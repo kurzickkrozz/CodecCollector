@@ -1,7 +1,7 @@
 # Codec Collector
 
 <p align="center">
-  <img src="CodecCollector.jpg" alt="Codec Collector Logo" width="180" height="180">
+  <img src="CodecCollector.ico" alt="Codec Collector Logo" width="180" height="180">
 </p>
 
 A portable, standalone Windows tool designed for Plex Media Server administrators to scan network shares (SMB/NAS), identify video stream codecs, calculate usage statistics, and export clean CSV reports.
