@@ -22,14 +22,16 @@ A portable, standalone Windows tool designed for Plex Media Server administrator
 1. Download the latest `CodecCollector.exe` release.
 2. Double-click the executable to launch it.
 3. Enter or paste your target directory path when prompted:
-   ```text
-   Enter the directory path to scan:
+   ```Enter the directory path to scan:```
+* Alternatively, you can run it via command-line arguments
+  ```text
+  .\CodecCollector.exe "\\192.168.1.50\media"
 
 ## Building From Source
 If you want to modify the Python script and compile your own standalone binary with PyInstaller, use the following steps:
-* Ensure you have Python and PyInstaller installed.
-* Locate your local path to ffprobe.exe (e.g., via WinGet or an FFmpeg installation).
-* Run the following PyInstaller compilation command:
-  ```text
-  pyinstaller --onefile --icon="path\to\CodecCollector.ico" --add-binary "C:\path\to\ffprobe.exe;." CodecCollector.py
-* Find your newly packaged .exe inside the dist folder.
+1. Ensure you have Python and PyInstaller installed.
+2. Locate your local path to ffprobe.exe (e.g., via WinGet or an FFmpeg installation).
+3. Run the following PyInstaller compilation command:
+   ```text
+   pyinstaller --onefile --icon="path\to\CodecCollector.ico" --add-binary "C:\path\to\ffprobe.exe;." CodecCollector.py
+4. Find your newly packaged .exe inside the dist folder.
