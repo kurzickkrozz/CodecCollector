@@ -7,6 +7,46 @@ import csv
 
 VIDEO_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".m4v", ".flv", ".wmv"}
 
+CODEC_ALIASES = {
+    # H.261 CODECS
+    "MPEG1": "H261",
+    "MPEG1VIDEO": "H261",
+    "MPEG-1": "H261",
+    # H.262 CODECS
+    "MPEG2": "H262",
+    "MPEG2VIDEO": "H262",
+    "MPEG-2": "H262",
+    # H.263 CODECS
+    "MPEG-4": "H263",
+    "MPEG4": "H263",
+    "H263P": "H263",
+    "H263I": "H263",
+    # H.264 CODECS
+    "AVC": "H264",
+    "H.264": "H264",
+    "H-264": "H264",
+    # H.265 CODECS
+    "H.265": "HEVC",
+    "H265": "HEVC",
+    "H-265": "HEVC",
+    # OTHER CODECS
+    "THEORA": "VP3",
+}
+
+CODEC_INFO = {
+    "AV1": "Est. in 2018. Developed by AOMedia. Highly efficient for 4K, 8K, and HDR.",
+    "H261": "Est. in 1988. Known as 'MPEG-1'. Legacy format.",
+    "H262": "Est. in 1995. Known as 'MPEG-2'. Early DVD format.",
+    "H263": "Est. in 1995. Known as 'MPEG-4 Part 2'. Early VTC format.",
+    "H264": "Est. in 2003. Known as 'MPEG-4 Part 10' or 'AVC'. Most compatible.",
+    "H266": "Est. in 2020. Known as 'VVC'. Highest efficiency for 8K and 360* VR.",
+    "HEVC": "Est. in 2013. Known as 'H265'. Made to cut down size for 4K media.",
+    "VP3": "Est. in 2000. Known as 'Theora'. On2 Technologies' 'TrueMotion'.",
+    "VP8": "Est. in 2010. Google's standard for WebM & WebRTC web streaming.",
+    "VP9": "Est. in 2013. Heavily used for YouTube. Highly efficient for 4K.",
+    "VC1": "Est. in 2006. Used for HD-DVDs to compete against Blu-ray."
+}
+
 def get_ffprobe_path():
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, "ffprobe.exe")
@@ -38,10 +78,11 @@ def get_video_codec(file_path):
     ]
     try:
         result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-        codec = result.stdout.strip()
-        return codec if codec else "unknown"
+        codec = result.stdout.strip().upper()
+        codec = CODEC_ALIASES.get(codec, codec)
+        return codec if codec else "UNKNOWN"
     except subprocess.SubprocessError:
-        return "unknown"
+        return "UNKNOWN"
 
 def organize_videos(root_directory):
     if not FFPROBE_PATH:
@@ -62,7 +103,7 @@ def organize_videos(root_directory):
             codec = get_video_codec(file_path)
             codec_dict[codec].append(file_path.name)
 
-    print("Program made and compiled by TunnelRat (aka Krozz)\n")
+    print("Script made by TunnelRat (aka Krozz)\n")
 
     for codec in sorted(codec_dict.keys()):
         print(f"Codec: {codec.upper()}")
@@ -80,6 +121,14 @@ def organize_videos(root_directory):
             count = len(codec_dict[codec])
             percentage = (count / total_files) * 100
             print(f"  {codec.upper()}: {percentage:.1f}% ({count})")
+        print()
+
+        # Codec Information Section
+        print("Codec Information")
+        print("-" * 40)
+        for codec in sorted(codec_dict.keys()):
+            info = CODEC_INFO.get(codec, "Custom or unlisted format.")
+            print(f"  {codec.upper()}: {info}")
 
         # Export to Desktop CSV
         desktop_path = Path.home() / "Desktop"
