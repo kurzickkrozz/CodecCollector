@@ -8,28 +8,22 @@ import csv
 VIDEO_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".m4v", ".flv", ".wmv"}
 
 CODEC_ALIASES = {
-    # H.261 CODECS
     "MPEG1": "H261",
     "MPEG1VIDEO": "H261",
     "MPEG-1": "H261",
-    # H.262 CODECS
     "MPEG2": "H262",
     "MPEG2VIDEO": "H262",
     "MPEG-2": "H262",
-    # H.263 CODECS
     "MPEG-4": "H263",
     "MPEG4": "H263",
     "H263P": "H263",
     "H263I": "H263",
-    # H.264 CODECS
     "AVC": "H264",
     "H.264": "H264",
     "H-264": "H264",
-    # H.265 CODECS
     "H.265": "HEVC",
     "H265": "HEVC",
     "H-265": "HEVC",
-    # OTHER CODECS
     "THEORA": "VP3",
 }
 
@@ -48,25 +42,20 @@ CODEC_INFO = {
 }
 
 def get_ffprobe_path():
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, "ffprobe.exe")
+    if getattr(sys, 'frozen', False):
+        base_dir = Path(sys.executable).parent
+    else:
+        base_dir = Path(__file__).parent
     
-    if not subprocess.run(["where", "ffprobe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
-        return "ffprobe"
-    
-    manual_path = Path("C:/ffmpeg/bin/ffprobe.exe")
-    if manual_path.exists():
-        return str(manual_path)
+    local_ffprobe = base_dir / "ffprobe.exe"
+    if local_ffprobe.exists():
+        return str(local_ffprobe)
         
-    return None
+    return "ffprobe"
 
 FFPROBE_PATH = get_ffprobe_path()
 
 def get_video_codec(file_path):
-    if not FFPROBE_PATH:
-        print("\n[Error] Could not locate 'ffprobe.exe'.")
-        sys.exit(1)
-
     path_str = str(Path(file_path).resolve())
     cmd = [
         FFPROBE_PATH,
@@ -85,10 +74,6 @@ def get_video_codec(file_path):
         return "UNKNOWN"
 
 def organize_videos(root_directory):
-    if not FFPROBE_PATH:
-        print("[Error] FFprobe is required but could not be found.")
-        return
-
     codec_dict = defaultdict(list)
     root_path = Path(root_directory)
 
@@ -96,7 +81,7 @@ def organize_videos(root_directory):
         print(f"\nError: Directory '{root_directory}' does not exist or is unreachable.")
         return
 
-    print(f"\nScanning network share at '{root_path.resolve()}'...\n")
+    print(f"\nScanning target at '{root_path.resolve()}'...\n")
 
     for file_path in root_path.rglob("*"):
         if file_path.is_file() and file_path.suffix.lower() in VIDEO_EXTENSIONS:
@@ -123,14 +108,12 @@ def organize_videos(root_directory):
             print(f"  {codec.upper()}: {percentage:.1f}% ({count})")
         print()
 
-        # Codec Information Section
         print("Codec Information")
         print("-" * 40)
         for codec in sorted(codec_dict.keys()):
             info = CODEC_INFO.get(codec, "Custom or unlisted format.")
             print(f"  {codec.upper()}: {info}")
 
-        # Export to Desktop CSV
         desktop_path = Path.home() / "Desktop"
         csv_filename = "codec-report.csv"
         csv_file_path = desktop_path / csv_filename
